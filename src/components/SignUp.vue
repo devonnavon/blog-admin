@@ -6,17 +6,17 @@
 					<v-col cols="12" sm="8" md="4">
 						<v-card class="elevation-12">
 							<v-toolbar color="primary" dark flat>
-								<v-toolbar-title>Login to the B L o G</v-toolbar-title>
+								<v-toolbar-title>Sign Up for the B L o G</v-toolbar-title>
 								<v-spacer></v-spacer>
 							</v-toolbar>
 							<v-card-text>
 								<v-alert v-if="authFailed" dense outlined type="error">
-									Log in
-									<strong>failed!</strong>
+									Passwords don't
+									<strong>match!</strong>
 								</v-alert>
 								<v-form>
 									<v-text-field
-										label="Login"
+										label="Sign Up"
 										name="username"
 										prepend-icon="mdi-account"
 										type="text"
@@ -30,13 +30,22 @@
 										prepend-icon="mdi-lock"
 										type="password"
 										v-model="password"
+									></v-text-field>
+
+									<v-text-field
+										id="passwordConfirm"
+										label="Confirm Password"
+										name="passwordConfirm"
+										prepend-icon="mdi-lock"
+										type="password"
+										v-model="passwordConfirm"
 										@keyup.enter="loginUser"
 									></v-text-field>
 								</v-form>
 							</v-card-text>
 							<v-card-actions>
 								<v-spacer></v-spacer>
-								<v-btn color="primary" @click.prevent="loginUser">Login</v-btn>
+								<v-btn color="primary">Sign Up</v-btn>
 							</v-card-actions>
 						</v-card>
 					</v-col>
@@ -48,7 +57,7 @@
 
 <script>
 export default {
-	name: 'Login',
+	name: 'SignUp',
 	props: {
 		source: String,
 	},
@@ -56,9 +65,10 @@ export default {
 		authFailed: false,
 		username: null,
 		password: null,
+		passwordConfirm: null,
 		error: {
 			isError: false,
-			message: 'Invalid Login',
+			message: "Passwords don't match!",
 		},
 	}),
 	methods: {

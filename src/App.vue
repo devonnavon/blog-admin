@@ -1,7 +1,12 @@
 <template>
 	<v-app>
 		<v-main>
-			<Login />
+			<div v-if="loggedIn">
+				Yo
+			</div>
+			<div v-else>
+				<Login @loggedIn="login" />
+			</div>
 		</v-main>
 	</v-app>
 </template>
@@ -18,7 +23,15 @@ export default {
 
 	data: () => ({
 		blogs: [],
-		loggedIn: null,
+		loggedIn: false,
 	}),
+
+	methods: {
+		login() {
+			this.loggedIn = true;
+			console.log('hey');
+			console.log(this.loggedIn);
+		},
+	},
 };
 </script>

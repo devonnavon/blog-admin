@@ -83,6 +83,7 @@ export default {
 					password: this.password,
 				});
 				localStorage.setItem('token', r.token);
+				this.$emit('loggedIn');
 				console.log(r);
 			} catch (err) {
 				console.log(err);

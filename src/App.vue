@@ -22,7 +22,7 @@
 				<Login @loggedIn="login" />
 			</div>
 			<div v-if="selectedPage === 'sign_up'">
-				<SignUp />
+				<SignUp @signedUp="signUpComplete" />
 			</div>
 			<div v-if="selectedPage === 'home'">home bro</div>
 			<div v-if="selectedPage === 'logout'">log out bro</div>
@@ -72,6 +72,10 @@ export default {
 		logout() {
 			this.loggedIn = false;
 			localStorage.clear();
+		},
+		signUpComplete(username) {
+			this.selectedPage = 'login';
+			console.log(username);
 		},
 		menuClick(slug) {
 			if (slug === 'logout') {

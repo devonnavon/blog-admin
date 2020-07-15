@@ -11,12 +11,12 @@
 							</v-toolbar>
 							<v-card-text>
 								<v-alert v-if="authFailed" dense outlined type="error">
-									Passwords don't
-									<strong>match!</strong>
+									Sign up
+									<strong>failed!</strong>
 								</v-alert>
 								<v-form>
 									<v-text-field
-										label="Sign Up"
+										label="Username"
 										name="username"
 										prepend-icon="mdi-account"
 										type="text"
@@ -29,6 +29,7 @@
 										name="password"
 										prepend-icon="mdi-lock"
 										type="password"
+										:rules="pwdRules"
 										v-model="password"
 									></v-text-field>
 
@@ -38,14 +39,17 @@
 										name="passwordConfirm"
 										prepend-icon="mdi-lock"
 										type="password"
+										:rules="pwdConfirm"
 										v-model="passwordConfirm"
-										@keyup.enter="loginUser"
+										@keyup.enter="signUpUser"
 									></v-text-field>
 								</v-form>
 							</v-card-text>
 							<v-card-actions>
 								<v-spacer></v-spacer>
-								<v-btn color="primary">Sign Up</v-btn>
+								<v-btn color="primary" @click.prevent="signUpUser"
+									>Sign Up</v-btn
+								>
 							</v-card-actions>
 						</v-card>
 					</v-col>
@@ -71,6 +75,17 @@ export default {
 			message: "Passwords don't match!",
 		},
 	}),
+	computed: {
+		pwdRules: function() {
+			return [(v) => !!v || 'Password required'];
+		},
+		pwdConfirm: function() {
+			return [
+				(v) => !!v || 'Confirm password',
+				(v) => v === this.password || 'Passwords do not match',
+			];
+		},
+	},
 	methods: {
 		async postData(url = '', data = {}) {
 			const response = await fetch(url, {
@@ -82,17 +97,17 @@ export default {
 			});
 			return response.json();
 		},
-		async loginUser() {
+		async signUpUser() {
 			try {
-				let r = await this.postData(`${process.env.VUE_APP_API_URL}/login`, {
-					username: this.username,
-					password: this.password,
-				});
-				if (r.token) {
-					localStorage.setItem('token', r.token);
-					this.$emit('loggedIn');
-				} else {
-					this.authFailed = true;
+				let r = await this.postData(
+					`${process.env.VUE_APP_API_URL}/users/new`,
+					{
+						username: this.username,
+						password: this.password,
+					}
+				);
+				if (r.username) {
+					this.$emit('signedUp', r.username);
 				}
 			} catch (err) {
 				console.log(err);
@@ -100,4 +115,13 @@ export default {
 		},
 	},
 };
+
+// {
+//     "_id": "5f0f51fa42788700176a576e",
+//     "username": "lordlord",
+//     "password": "$2a$10$A5WCHcbcSSZluR9alLx2heWjs2pORcuLJ8xZs9zEM.zGaRqp1ZJpO",
+//     "createdAt": "2020-07-15T18:59:06.611Z",
+//     "updatedAt": "2020-07-15T18:59:06.611Z",
+//     "__v": 0
+// }
 </script>

@@ -21,6 +21,7 @@
 										prepend-icon="mdi-account"
 										type="text"
 										v-model="username"
+										value="aasdasd"
 									></v-text-field>
 
 									<v-text-field
@@ -49,9 +50,9 @@
 <script>
 export default {
 	name: 'Login',
-	props: {
-		source: String,
-	},
+	// props: {
+	// 	username: String,
+	// },
 	data: () => ({
 		authFailed: false,
 		username: null,

@@ -125,6 +125,13 @@
 							</v-list-item-content>
 						</v-list-item>
 					</v-card>
+					<v-card max-width="600" class="mx-auto my-2">
+						<v-card-actions>
+							<v-icon big class="mx-auto" @click="newPost()"
+								>mdi-plus-circle</v-icon
+							>
+						</v-card-actions>
+					</v-card>
 				</div>
 				<div v-if="selectedPage === 'logout'">log out bro</div>
 			</div>
@@ -262,9 +269,6 @@ export default {
 						published: this.blogs[this.findBlog(id)].published,
 					}
 				);
-				console.log('title' + title);
-				console.log('body' + body);
-				console.log(r);
 				this.blogs.splice(this.findBlog(id), 1, r);
 			} catch (err) {
 				console.log(err);
@@ -329,12 +333,38 @@ export default {
 				console.log(err);
 			}
 		},
+		async postData(url = '', authToken, data = {}) {
+			const response = await fetch(url, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${authToken}`,
+				},
+				body: JSON.stringify(data),
+			});
+			return response.json();
+		},
+		async newPost() {
+			try {
+				let r = await this.postData(
+					`${process.env.VUE_APP_API_URL}/posts/`,
+					localStorage.token,
+					{
+						title: 'Post Title',
+						body: 'Post Content',
+						published: false,
+					}
+				);
+				this.$set(this.blogs, this.blogs.length, r);
+			} catch (err) {
+				console.log(err);
+			}
+		},
 		editPost(id) {
 			this.$set(this.editPostToggle, id, true);
 		},
 
 		submitEdits(id) {
-			console.log(this.postEdits[id]);
 			this.updatePost(id, this.postEdits[id].title, this.postEdits[id].body);
 			this.$set(this.editPostToggle, id, false);
 		},

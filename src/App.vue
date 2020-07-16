@@ -38,16 +38,45 @@
 									class="d-inline-flex justify-space-between align-items-center align-content-center mb-2"
 								>
 									<span class="overline pl-2">Blog Post</span>
-									<v-icon class="mr-1">mdi-one-up</v-icon>
+									<v-icon
+										class="mr-1"
+										v-show="!editPostToggle[blog._id]"
+										@click="editPost(blog._id)"
+										>mdi-one-up</v-icon
+									>
+									<v-icon
+										class="mr-1"
+										v-show="editPostToggle[blog._id]"
+										@click="submitEdits(blog._id)"
+										>mdi-check</v-icon
+									>
 									<v-icon class="mr-1" @click="deletePost(blog._id)"
 										>delete</v-icon
 									>
 								</v-card>
 
-								<v-list-item-title class="headline mb-1">
+								<v-list-item-title
+									v-bind="editContent(blog._id)"
+									v-bind:style="
+										editPostToggle[blog._id]
+											? 'border: 1px dotted orange;'
+											: 'border: none;'
+									"
+									class="headline mb-1"
+									@input="titleChange($event, blog._id)"
+								>
 									{{ blog.title }}
 								</v-list-item-title>
-								<v-list-item-subtitle class="mt-2">
+								<v-list-item-subtitle
+									class="mt-2"
+									v-bind="editContent(blog._id)"
+									@input="bodyChange($event, blog._id)"
+									v-bind:style="
+										editPostToggle[blog._id]
+											? 'border: 1px dotted orange;'
+											: 'border: none;'
+									"
+								>
 									{{ blog.body }}
 								</v-list-item-subtitle>
 								<div v-show="commentsToggle[blog._id]">
@@ -130,6 +159,8 @@ export default {
 		sidebar: false,
 		comments: [],
 		commentsToggle: {},
+		editPostToggle: {},
+		postEdits: {},
 		selectedPage: 'login',
 		defaultMenu: [
 			{ title: 'Login', path: '', icon: 'lock_open', slug: 'login' },
@@ -139,14 +170,36 @@ export default {
 			{ title: 'Home', path: '', icon: 'home', slug: 'home' },
 			{ title: 'Log Out', path: '', icon: 'logout', slug: 'logout' },
 		],
+		activeBorder: [],
 	}),
 	computed: {
 		menuItems: function() {
 			if (this.loggedIn) return this.authMenu;
 			else return this.defaultMenu;
 		},
+		// borderState: function() {
+		// 	return { activeBorder: '1px dotted gray' };
+		// },
 	},
 	methods: {
+		// editBorder(id) {
+		// 	if (this.editBorder[id]) {
+		// 		return { border: '1px dotted gray' };
+		// 	}
+		// },
+		editContent(id) {
+			if (this.editPostToggle[id]) {
+				return { contenteditable: true };
+			} else return { contenteditable: false };
+		},
+		titleChange(e, id) {
+			this.postEdits[id].title = e.target.innerHTML;
+		},
+		bodyChange(e, id) {
+			// console.log(this.postEdits[id]);
+			// console.log(e.target.innerHTML);
+			this.postEdits[id].body = e.target.innerHTML;
+		},
 		getPostComments(id) {
 			let chill = this.comments.filter((e) => e.post === id);
 			return chill;
@@ -199,12 +252,32 @@ export default {
 				console.log(err);
 			}
 		},
+		async updatePost(id, title, body) {
+			try {
+				let r = await this.putData(
+					`${process.env.VUE_APP_API_URL}/posts/${id}`,
+					{
+						title: title,
+						body: body,
+						published: this.blogs[this.findBlog(id)].published,
+					}
+				);
+				console.log('title' + title);
+				console.log('body' + body);
+				console.log(r);
+				this.blogs.splice(this.findBlog(id), 1, r);
+			} catch (err) {
+				console.log(err);
+			}
+		},
 		async getPosts() {
 			try {
 				let r = await fetch(`${process.env.VUE_APP_API_URL}/posts`);
 				this.blogs = await r.json();
 				this.blogs.forEach((e) => {
 					this.$set(this.commentsToggle, e._id, false);
+					this.$set(this.editPostToggle, e._id, false);
+					this.$set(this.postEdits, e._id, { title: e.title, body: e.body });
 				}); //init commentsToggle to false so all comments are hidden
 			} catch (err) {
 				console.log(err);
@@ -255,6 +328,15 @@ export default {
 			} catch (err) {
 				console.log(err);
 			}
+		},
+		editPost(id) {
+			this.$set(this.editPostToggle, id, true);
+		},
+
+		submitEdits(id) {
+			console.log(this.postEdits[id]);
+			this.updatePost(id, this.postEdits[id].title, this.postEdits[id].body);
+			this.$set(this.editPostToggle, id, false);
 		},
 	},
 };
